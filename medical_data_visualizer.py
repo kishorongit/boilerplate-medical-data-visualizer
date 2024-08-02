@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # 1
-df = pd.read_csv("medical_examination.csv", index_col=["id"])
+df = pd.read_csv("medical_examination.csv")
 
 # 2
 df['overweight'] = (df['weight'] / (df['height'] / 100) ** 2 > 25).astype(int)
@@ -37,22 +37,28 @@ def draw_cat_plot():
 # 10
 def draw_heat_map():
     # 11
-    df_heat = None
+    mask_pressure = (df['ap_lo'] <= df['ap_hi'])
+    mask_height = (
+        (df['height'] >= df['height'].quantile(0.025)) &
+        (df['height'] <= df['height'].quantile(0.975))
+    )
+    mask_weight = (
+        (df['weight'] >= df['weight'].quantile(0.025)) &
+        (df['weight'] <= df['weight'].quantile(0.975))
+    )
+    df_heat = df[mask_pressure & mask_height & mask_weight]
 
     # 12
-    corr = None
-
+    corr = df_heat.corr()
+    
     # 13
-    mask = None
-
-
+    mask = np.triu(np.ones_like(corr, dtype=bool))
 
     # 14
-    fig, ax = None
+    fig, ax = plt.subplots(figsize=(16, 9))
 
     # 15
-
-
+    sns.heatmap(corr, mask=mask, square=True, linewidths=0.5, annot=True, fmt="0.1f")
 
     # 16
     fig.savefig('heatmap.png')
